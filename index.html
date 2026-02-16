@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MBBSAnonymous</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F111A;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.25);
+      --blue: #4FA3F7;
+      --green: #28B463;
+      --text: #ECECEC;
+      --muted: #B0B0B0;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(1200px 600px at 50% -10%, rgba(79,163,247,.15), transparent),
+                  var(--bg);
+      color: var(--text);
+      font-family: 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 28px 22px 32px;
+      backdrop-filter: blur(14px);
+    }
+
+    .logo {
+      width: 160px;
+      height: 160px;
+      margin: 6px auto 12px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px dashed rgba(255,255,255,0.25);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 12px;
+    }
+
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      margin: 8px 0 6px;
+      letter-spacing: .3px;
+    }
+
+    p {
+      color: var(--muted);
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    .cta {
+      appearance: none;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 22px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #0b1220;
+      cursor: pointer;
+      background: linear-gradient(45deg, var(--blue), var(--green));
+      box-shadow: 0 10px 30px rgba(79,163,247,.35);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      width: 100%;
+      max-width: 260px;
+      margin: 10px auto 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .cta:hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 14px 36px rgba(79,163,247,.45);
+      filter: brightness(1.05);
+    }
+
+    .cta:active { transform: translateY(0) scale(.99); }
+
+    .foot {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="logo">
+      <!-- Put your logo file path here -->
+      <img src="logo.png" alt="MBBSAnonymous logo" />
+    </div>
+
+    <h1>MBBSAnonymous</h1>
+    <p>Share or read messages anonymously. Safe space for med students.</p>
+
+    <button class="cta" id="tapHere">Tap here</button>
+
+    <div class="foot">No login • Anonymous • Secure</div>
+  </main>
+
+  <script>
+    document.getElementById("tapHere").onclick = () => {
+      window.location.href = "./send.html"; // change to your real page
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Send Message - MBBSAnonymous</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto&display=swap" rel="stylesheet">
+<style>
+  /* ----------------- GLOBAL STYLES ----------------- */
+  body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #0F111A;
+    color: #ECECEC;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ----------------- CONTAINER ----------------- */
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 20px;
+  }
+
+  /* ----------------- HEADER ----------------- */
+  header {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+  }
+
+  h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    color: #4FA3F7;
+    text-align: center;
+    flex: 1;
+    margin: 0 10px;
+  }
+
+  /* Hamburger Menu */
+  .hamburger {
+    width: 30px;
+    height: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .hamburger div {
+    height: 3px;
+    background: #ECECEC;
+    border-radius: 2px;
+  }
+
+  /* ----------------- GLASS CARD ----------------- */
+  .glass-card {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    padding: 30px 25px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: #ECECEC;
+    font-size: 16px;
+    resize: none;
+    transition: 0.3s;
+  }
+
+  textarea::placeholder {
+    color: #B0B0B0;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: #4FA3F7;
+    box-shadow: 0 0 10px rgba(79,163,247,0.3);
+  }
+
+  .counter {
+    text-align: right;
+    font-size: 14px;
+    color: #B0B0B0;
+    margin-top: 5px;
+  }
+
+  /* ----------------- SEND BUTTON ----------------- */
+  #sendBtn {
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(45deg,#4FA3F7,#28B463);
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+
+  #sendBtn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  }
+
+  #sendBtn:disabled {
+    background: rgba(79,163,247,0.4);
+    cursor: not-allowed;
+  }
+
+  #sendBtn .loader {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* ----------------- TOAST ----------------- */
+  .toast {
+    display: none;
+    background: rgba(40, 180, 99, 0.9);
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 15px;
+    font-weight: bold;
+    margin-top: 20px;
+    animation: fadein 0.5s, fadeout 0.5s 1.5s;
+  }
+
+  @keyframes fadein { from {opacity:0} to {opacity:1} }
+  @keyframes fadeout { from {opacity:1} to {opacity:0} }
+
+  /* ----------------- TERMS PANEL ----------------- */
+  .terms-panel {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100%;
+    background: rgba(26,28,43,0.95);
+    color: #ECECEC;
+    padding: 25px;
+    overflow-y: auto;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+    transition: right 0.4s ease;
+    z-index: 10;
+  }
+
+  .terms-panel.active {
+    right: 0;
+  }
+
+  .terms-panel h2 {
+    margin-top: 0;
+    color: #4FA3F7;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .terms-panel .close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    cursor: pointer;
+    font-size: 1.5rem;
+  }
+
+  .info-link {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #B0B0B0;
+  }
+
+  .info-link a {
+    color: #4FA3F7;
+    text-decoration: none;
+    margin-left: 6px;
+    font-weight: 500;
+  }
+
+  .info-link a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HEADER -->
+  <header>
+    <img src="logo.png" alt="Logo" class="logo">
+    <h1>MBBS Anonymous</h1>
+    <div class="hamburger" id="hamburger">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </header>
+
+  <!-- GLASS CARD -->
+  <div class="glass-card">
+    <textarea id="message" maxlength="500" placeholder="Type the hot gist here..."></textarea>
+    <div class="counter" id="counter">0 / 500</div>
+    <button id="sendBtn">
+      <span class="btn-text">Send</span>
+      <span class="loader" style="display:none;"></span>
+    </button>
+    <div class="toast" id="toast">The Message don send!</div>
+  </div>
+</div>
+
+<!-- TERMS PANEL -->
+<div class="terms-panel" id="termsPanel">
+  <span class="close" id="closeTerms">&times;</span>
+  <h2>Terms of MBBSAnonymous</h2>
+  <!-- English Terms -->
+  <div class="terms-section">
+    <h3>Anonymous Submissions</h3>
+    <p>
+      MBBSAnonymous allows users to submit messages anonymously. Users may post any message; however, all responsibility for the content lies entirely with the person submitting it.
+    </p>
+    <h3>No Responsibility for Content</h3>
+    <p>
+      MBBSAnonymous and its administrators are not responsible for any messages posted by users, including but not limited to inappropriate, offensive, abusive, or harmful content.
+    </p>
+    <h3>No Liability for Abuse or Harm</h3>
+    <p>
+      The website and its administrators cannot be held liable for any abuse, harassment, or negative consequences arising from messages directed at students, lecturers, or the school.
+    </p>
+    <h3>User Responsibility</h3>
+    <p>
+      Users are fully responsible for any consequences that result from the messages they submit. Posting content that violates rules, laws, or school policies is solely the responsibility of the user.
+    </p>
+    <h3>Platform Rights</h3>
+    <p>
+      MBBSAnonymous reserves the right to remove messages at its discretion, but removal is not an obligation and does not imply liability.
+    </p>
+    <h3>Acknowledgment</h3>
+    <p>
+      By using MBBSAnonymous, you acknowledge that the platform and its administrators do not monitor, control, or take responsibility for any content posted by users.
+    </p>
+  </div>
+
+  <!-- French Terms -->
+  <div class="terms-section" style="margin-top:30px;">
+    <h3>Soumissions Anonymes</h3>
+    <p>
+      MBBSAnonymous permet aux utilisateurs de soumettre des messages de manière anonyme. Les utilisateurs peuvent publier n’importe quel message ; toutefois, toute responsabilité liée au contenu incombe entièrement à la personne qui le soumet.
+    </p>
+    <h3>Aucune responsabilité sur le contenu</h3>
+    <p>
+      MBBSAnonymous et ses administrateurs ne sont pas responsables des messages publiés par les utilisateurs, y compris, mais sans s’y limiter, tout contenu inapproprié, offensant, abusif ou nuisible.
+    </p>
+    <h3>Aucune responsabilité en cas d’abus ou de préjudice</h3>
+    <p>
+      Le site web et ses administrateurs ne peuvent être tenus responsables de tout abus, harcèlement ou conséquence négative résultant de messages adressés aux étudiants, enseignants ou à l’école.
+    </p>
+    <h3>Responsabilité des utilisateurs</h3>
+    <p>
+      Les utilisateurs sont entièrement responsables des conséquences découlant des messages qu’ils soumettent. Publier un contenu qui viole les règles, la loi ou les politiques de l’école relève exclusivement de la responsabilité de l’utilisateur.
+    </p>
+    <h3>Droits de la plateforme</h3>
+    <p>
+      MBBSAnonymous se réserve le droit de supprimer les messages à sa discrétion, mais cette suppression n’est pas obligatoire et n’implique aucune responsabilité.
+    </p>
+    <h3>Reconnaissance</h3>
+    <p>
+      En utilisant MBBSAnonymous, vous reconnaissez que la plateforme et ses administrateurs ne surveillent pas, ne contrôlent pas et n’assument aucune responsabilité pour le contenu publié par les utilisateurs.
+    </p>
+  </div>
+</div>
+
+<div class="info-link">
+  <span>Any complain or info?</span>
+  <a href="https://wa.me/19092827074" target="_blank">
+    message me
+  </a>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC0OXKYEwh7aNeAZ2JkY8Q-WdOCr_MTApg",
+    authDomain: "anonymous0000-bbbe.firebaseapp.com",
+    projectId: "anonymous0000-bbbe",
+    storageBucket: "anonymous0000-bbbe.appspot.com",
+    messagingSenderId: "569708942202",
+    appId: "1:569708942202:web:00e0f96d314da5f5c37cc3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const messageInput = document.getElementById("message");
+  const counter = document.getElementById("counter");
+  const sendBtn = document.getElementById("sendBtn");
+  const toast = document.getElementById("toast");
+  const hamburger = document.getElementById("hamburger");
+  const termsPanel = document.getElementById("termsPanel");
+  const closeTerms = document.getElementById("closeTerms");
+
+  // Character counter
+  messageInput.addEventListener("input", () => {
+    counter.textContent = `${messageInput.value.length} / 500`;
+  });
+
+  // Send message with loader and disable button
+  sendBtn.addEventListener("click", async () => {
+    const text = messageInput.value.trim();
+    if (!text) return alert("You need to type something!");
+
+    sendBtn.disabled = true;
+    sendBtn.querySelector(".btn-text").style.display = "none";
+    sendBtn.querySelector(".loader").style.display = "inline-block";
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        text: text,
+        timestamp: serverTimestamp()
+      });
+
+      messageInput.value = "";
+      counter.textContent = "0 / 500";
+      toast.style.display = "block";
+      setTimeout(() => toast.style.display = "none", 2000);
+
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send message. Try again.");
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.querySelector(".btn-text").style.display = "inline";
+      sendBtn.querySelector(".loader").style.display = "none";
+    }
+  });
+
+  // Hamburger menu toggle
+  hamburger.addEventListener("click", () => {
+    termsPanel.classList.add("active");
+  });
+
+  closeTerms.addEventListener("click", () => {
+    termsPanel.classList.remove("active");
+  });
+
+  // Close panel on click outside
+  window.addEventListener("click", (e) => {
+    if (e.target === termsPanel) {
+      termsPanel.classList.remove("active");
+    }
+  });
+</script>
+
+</body>
+</html>
