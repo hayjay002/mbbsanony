@@ -22,6 +22,50 @@ h1 {
   color: #4FA3F7;
 }
 
+/* Login */
+.login-box {
+  max-width: 360px;
+  margin: 40px auto 20px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.2);
+  text-align: center;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: #ECECEC;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  background: linear-gradient(45deg,#4FA3F7,#28B463);
+  color: white;
+  cursor: pointer;
+}
+
+#loginError {
+  color: #ff7b7b;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* Hide app until logged in */
+body:not(.logged-in) #app {
+  display: none;
+}
+
 /* Search */
 #search {
   width: 100%;
@@ -106,22 +150,38 @@ h1 {
 </head>
 
 <body>
-<h1>Anonymous Messages</h1>
 
-<input id="search" placeholder="Search messages...">
-
-<div class="toolbar">
-  <button id="deleteSelected">Delete Selected</button>
-  <button id="downloadSelected">Download Selected</button>
+<!-- LOGIN -->
+<div id="loginBox" class="login-box">
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
+  <p id="loginError"></p>
 </div>
 
-<div class="messages" id="messagesContainer"></div>
+<!-- APP -->
+<div id="app">
+  <h1>Anonymous Messages</h1>
+
+  <input id="search" placeholder="Search messages...">
+
+  <div class="toolbar">
+    <button id="deleteSelected">Delete Selected</button>
+    <button id="downloadSelected">Download Selected</button>
+  </div>
+
+  <div class="messages" id="messagesContainer"></div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+/* Simple login creds */
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "1234";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC0OXKYEwh7aNeAZ2JkY8Q-WdOCr_MTApg",
@@ -137,6 +197,24 @@ const db = getFirestore(app);
 
 const container = document.getElementById("messagesContainer");
 const search = document.getElementById("search");
+
+/* Login */
+const loginBox = document.getElementById("loginBox");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
+
+loginBtn.onclick = () => {
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    document.body.classList.add("logged-in");
+    loginBox.style.display = "none";
+    loadMessages();
+  } else {
+    loginError.textContent = "Wrong username or password";
+  }
+};
 
 let allMessages = [];
 
@@ -159,9 +237,10 @@ function render(list) {
 
     card.innerHTML = `
       <input type="checkbox">
-      <p>${m.text}</p>
+      <p>${m.text || ""}</p>
       <div class="timestamp">${m.timestamp?.toDate?.().toLocaleString() || ""}</div>
     `;
+
     container.appendChild(card);
   });
 }
@@ -169,7 +248,7 @@ function render(list) {
 /* SEARCH */
 search.addEventListener("input", () => {
   const t = search.value.toLowerCase();
-  render(allMessages.filter(m => m.text.toLowerCase().includes(t)));
+  render(allMessages.filter(m => (m.text || "").toLowerCase().includes(t)));
 });
 
 /* DELETE */
@@ -178,42 +257,39 @@ document.getElementById("deleteSelected").onclick = async () => {
     .map(cb => cb.parentElement.dataset.id);
 
   if (!selected.length) return alert("Select messages first");
-
   if (!confirm("Delete selected messages?")) return;
 
   try {
-    await Promise.all(
-      selected.map(id => deleteDoc(doc(db, "messages", id)))
-    );
+    await Promise.all(selected.map(id => deleteDoc(doc(db, "messages", id))));
     alert("Deleted successfully ✅");
     loadMessages();
   } catch (err) {
-    console.error("Delete failed:", err);
+    console.error(err);
     alert("Delete failed. Check console.");
   }
 };
 
-
-/* DOWNLOAD (iOS SAFE) */
+/* DOWNLOAD — exact card */
 document.getElementById("downloadSelected").onclick = async () => {
   const cards = [...document.querySelectorAll(".card input:checked")]
     .map(cb => cb.parentElement);
 
   if (!cards.length) return alert("Select messages first");
 
-  for (let i=0;i<cards.length;i++) {
+  for (let i = 0; i < cards.length; i++) {
     const card = cards[i];
-    const checkbox = card.querySelector("input");
-    checkbox.style.display = "none";
 
-    const canvas = await html2canvas(card,{backgroundColor:null});
-    checkbox.style.display = "block";
+    const canvas = await html2canvas(card, {
+      backgroundColor: null,
+      scale: window.devicePixelRatio
+    });
 
-    const blob = await (await fetch(canvas.toDataURL())).blob();
-    const file = new File([blob],`message-${i+1}.png`,{type:"image/png"});
+    const blob = await (await fetch(canvas.toDataURL("image/png"))).blob();
+    const file = new File([blob], `message-${i + 1}.png`, { type: "image/png" });
 
     if (navigator.share) {
-      await navigator.share({ files:[file] });
+      await navigator.share({ files: [file] });
+      break; // iOS requires user action per share
     } else {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -222,8 +298,6 @@ document.getElementById("downloadSelected").onclick = async () => {
     }
   }
 };
-
-loadMessages();
 </script>
 
 </body>
